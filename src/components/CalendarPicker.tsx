@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 interface Props {
   onSelect: (date: string) => void;
@@ -16,8 +17,26 @@ export function CalendarPicker({ onSelect, onBack }: Props) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [closedDow, setClosedDow] = useState<number[]>([]);
+  const [closedDateSet, setClosedDateSet] = useState<Set<string>>(new Set());
 
   const todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
+
+  useEffect(() => {
+    supabase
+      .from('closed_dates')
+      .select('type, day_of_week, date')
+      .then(({ data }) => {
+        if (!data) return;
+        setClosedDow(
+          data.filter(r => r.type === 'weekly').map(r => r.day_of_week as number)
+        );
+        setClosedDateSet(
+          new Set(data.filter(r => r.type === 'date').map(r => r.date as string))
+        );
+      });
+  }, []);
+
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
 
@@ -45,19 +64,27 @@ export function CalendarPicker({ onSelect, onBack }: Props) {
       </div>
       <div className="calendar-grid">
         {DAY_NAMES.map((d, i) => (
-          <div key={d} className={`calendar-dow ${i === 0 ? 'sunday' : ''}`}>{d}</div>
+          <div
+            key={d}
+            className={`calendar-dow${i === 0 ? ' sunday' : i === 6 ? ' saturday' : ''}`}
+          >
+            {d}
+          </div>
         ))}
         {cells.map((day, i) => {
           if (!day) return <div key={`e-${i}`} />;
           const dateStr = formatDate(viewYear, viewMonth, day);
           const isPast = dateStr < todayStr;
-          const isSun = new Date(viewYear, viewMonth, day).getDay() === 0;
-          const disabled = isPast || isSun;
+          const dow = new Date(viewYear, viewMonth, day).getDay();
+          const isSun = dow === 0;
+          const isClosed = closedDow.includes(dow) || closedDateSet.has(dateStr);
+          const disabled = isPast || isClosed;
           return (
             <button
               key={day}
-              className={`calendar-day${disabled ? ' disabled' : ''}${isSun ? ' sunday' : ''}`}
+              className={`calendar-day${isPast ? ' disabled' : isClosed ? ' disabled closed' : ''}${isSun ? ' sunday' : ''}`}
               disabled={disabled}
+              title={isClosed && !isPast ? '定休日' : undefined}
               onClick={() => onSelect(dateStr)}
             >
               {day}

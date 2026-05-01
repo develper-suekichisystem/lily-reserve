@@ -11,17 +11,25 @@ interface Props {
 }
 
 export function TimePicker({ date, onSelect, onBack }: Props) {
-  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  const [unavailableTimes, setUnavailableTimes] = useState<string[]>([]);
   const { withLoading } = useLoading();
 
   useEffect(() => {
     withLoading(async () => {
-      const { data } = await supabase
-        .from('reservations')
-        .select('time')
-        .eq('date', date)
-        .eq('status', 'confirmed');
-      if (data) setBookedTimes(data.map(r => (r.time as string).slice(0, 5)));
+      const [{ data: reservData }, { data: blockedData }] = await Promise.all([
+        supabase
+          .from('reservations')
+          .select('time')
+          .eq('date', date)
+          .eq('status', 'confirmed'),
+        supabase
+          .from('blocked_slots')
+          .select('time')
+          .eq('date', date),
+      ]);
+      const reserved = reservData?.map(r => (r.time as string).slice(0, 5)) ?? [];
+      const blocked  = blockedData?.map(r => (r.time as string).slice(0, 5)) ?? [];
+      setUnavailableTimes([...new Set([...reserved, ...blocked])]);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
@@ -35,16 +43,16 @@ export function TimePicker({ date, onSelect, onBack }: Props) {
       <div className="time-grid">
         {HOURS.map(h => {
           const time = fmt(h);
-          const booked = bookedTimes.includes(time);
+          const unavailable = unavailableTimes.includes(time);
           return (
             <button
               key={h}
-              className={`time-slot ${booked ? 'booked' : 'available'}`}
-              disabled={booked}
+              className={`time-slot ${unavailable ? 'booked' : 'available'}`}
+              disabled={unavailable}
               onClick={() => onSelect(time)}
             >
               <span>{h}:00〜{h + 1}:00</span>
-              <span className="slot-status">{booked ? '×' : '○'}</span>
+              <span className="slot-status">{unavailable ? '×' : '○'}</span>
             </button>
           );
         })}

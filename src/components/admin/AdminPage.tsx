@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { MenuAdmin } from './MenuAdmin';
+import { ScheduleAdmin } from './ScheduleAdmin';
 import { AdminLogin, isAdminAuthenticated } from './AdminLogin';
 import type { Reservation } from '../../types';
 
-type AdminTab = 'reservations' | 'menus';
+type AdminTab = 'reservations' | 'menus' | 'schedule';
 
 function ReservationAdmin() {
   const today = new Date().toISOString().split('T')[0];
@@ -83,11 +84,6 @@ export function AdminPage() {
 
   if (!authed) return <AdminLogin onLogin={() => setAuthed(true)} />;
 
-  function handleLogout() {
-    sessionStorage.removeItem('rinpa_admin_auth');
-    setAuthed(false);
-  }
-
   return (
     <div className="admin-page">
       <header className="app-header">
@@ -108,14 +104,18 @@ export function AdminPage() {
         >
           メニュー管理
         </button>
-        <button className="admin-tab admin-tab-logout" onClick={handleLogout}>
-          ログアウト
+        <button
+          className={`admin-tab${tab === 'schedule' ? ' active' : ''}`}
+          onClick={() => setTab('schedule')}
+        >
+          休日設定
         </button>
       </div>
 
       <div className="admin-content">
         {tab === 'reservations' && <ReservationAdmin />}
         {tab === 'menus' && <MenuAdmin />}
+        {tab === 'schedule' && <ScheduleAdmin />}
       </div>
     </div>
   );

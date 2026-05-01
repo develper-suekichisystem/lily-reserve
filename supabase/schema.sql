@@ -4,14 +4,16 @@
 
 -- menus（メニューマスタ）
 CREATE TABLE menus (
-  id               UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
-  name             TEXT        NOT NULL,
-  price            INTEGER     NOT NULL,
-  duration_minutes INTEGER     DEFAULT 60,
-  description      TEXT,
-  is_active        BOOLEAN     DEFAULT true,
-  sort_order       INTEGER     DEFAULT 0,
-  created_at       TIMESTAMPTZ DEFAULT NOW()
+  id                         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  name                       TEXT        NOT NULL,
+  price                      INTEGER     NOT NULL,
+  duration_minutes           INTEGER     DEFAULT 60,
+  customer_duration_minutes  INTEGER,
+  provider_duration_minutes  INTEGER,
+  description                TEXT,
+  is_active                  BOOLEAN     DEFAULT true,
+  sort_order                 INTEGER     DEFAULT 0,
+  created_at                 TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- users（LINE連携ユーザー）
@@ -51,9 +53,18 @@ ALTER TABLE menus         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reservations  ENABLE ROW LEVEL SECURITY;
 
--- menus: 有効メニューは全員読み取り可
-CREATE POLICY "menus_select_active"
-  ON menus FOR SELECT USING (is_active = true);
+-- menus: 全操作許可
+CREATE POLICY "menus_select_all"
+  ON menus FOR SELECT USING (true);
+
+CREATE POLICY "menus_insert"
+  ON menus FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "menus_update"
+  ON menus FOR UPDATE USING (true) WITH CHECK (true);
+
+CREATE POLICY "menus_delete"
+  ON menus FOR DELETE USING (true);
 
 -- users: 全操作許可（サービスロールキー or anon経由 — 本番はRLS強化推奨）
 CREATE POLICY "users_all"
@@ -62,6 +73,32 @@ CREATE POLICY "users_all"
 -- reservations: 全操作許可
 CREATE POLICY "reservations_all"
   ON reservations FOR ALL USING (true) WITH CHECK (true);
+
+-- ============================================================
+-- closed_dates（定休曜日・特定の休日）
+-- ============================================================
+CREATE TABLE closed_dates (
+  id           UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  type         TEXT        NOT NULL CHECK (type IN ('weekly', 'date')),
+  day_of_week  INTEGER     CHECK (day_of_week BETWEEN 0 AND 6),
+  date         DATE,
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE closed_dates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "closed_dates_all" ON closed_dates FOR ALL USING (true) WITH CHECK (true);
+
+-- blocked_slots（対応不可日時）
+CREATE TABLE blocked_slots (
+  id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  date       DATE        NOT NULL,
+  time       TIME        NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (date, time)
+);
+
+ALTER TABLE blocked_slots ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "blocked_slots_all" ON blocked_slots FOR ALL USING (true) WITH CHECK (true);
 
 -- ============================================================
 -- 初期データ（メニュー）

@@ -551,3 +551,60 @@ textarea.form-input { resize: vertical; font-family: inherit; }
 /* フォーム2列 */
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-hint { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
+
+/* ============================================================
+   休日設定
+   ============================================================ */
+.schedule-admin { padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+.schedule-section {
+  border: 1px solid var(--gray-200); border-radius: 12px; padding: 16px;
+}
+.schedule-heading {
+  font-size: 15px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px;
+}
+.schedule-desc { font-size: 12px; color: var(--gray-400); margin-bottom: 12px; }
+
+/* 定休曜日ボタン */
+.dow-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.dow-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid var(--gray-200); background: var(--white);
+  font-size: 14px; font-weight: 600; color: var(--gray-600);
+  cursor: pointer; transition: all 0.15s; font-family: inherit;
+}
+.dow-btn:hover:not(:disabled) { border-color: var(--tiffany); color: var(--tiffany); }
+.dow-btn.closed {
+  border-color: var(--error); background: #fef2f2; color: var(--error);
+}
+.dow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 追加フォーム行 */
+.schedule-add-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.schedule-date-input, .schedule-time-select {
+  border: 1px solid var(--gray-200); border-radius: 8px;
+  padding: 8px 10px; font-size: 13px; color: var(--gray-800);
+  outline: none; font-family: inherit;
+}
+.schedule-date-input:focus, .schedule-time-select:focus {
+  border-color: var(--tiffany);
+}
+
+/* リスト */
+.schedule-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.schedule-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px; background: var(--gray-50); border-radius: 8px;
+  font-size: 13px; color: var(--gray-700);
+}
+.btn-remove {
+  font-size: 12px; border-radius: 6px; padding: 3px 10px;
+  border: 1px solid var(--error); background: none;
+  color: var(--error); cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.btn-remove:hover { background: #fef2f2; }
+
+/* 定休日カレンダー表示 */
+.calendar-day.closed:not(.disabled) { background: #fef2f2; color: var(--error); }
+.calendar-day.disabled.closed { color: var(--gray-300); }
+.calendar-dow.saturday { color: #3b82f6; }
+.btn-add:disabled { opacity: 0.5; cursor: not-allowed; }

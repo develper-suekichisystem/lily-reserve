@@ -16,6 +16,7 @@ export function MenuSelect({ onSelect }: Props) {
       const { data } = await supabase
         .from('menus')
         .select('*')
+        .eq('service_type', 'rinpa')
         .eq('is_active', true)
         .order('sort_order');
       if (data) setMenus(data as Menu[]);

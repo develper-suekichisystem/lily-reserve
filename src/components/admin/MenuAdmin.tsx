@@ -26,6 +26,7 @@ export function MenuAdmin() {
     const { data } = await supabase
       .from('menus')
       .select('*')
+      .eq('service_type', 'rinpa')
       .order('sort_order');
     if (data) setMenus(data as Menu[]);
     setLoading(false);
@@ -77,7 +78,7 @@ export function MenuAdmin() {
       await supabase.from('menus').update(payload).eq('id', editing.id);
     } else {
       const maxOrder = menus.length > 0 ? Math.max(...menus.map(m => m.sort_order)) + 1 : 1;
-      await supabase.from('menus').insert({ ...payload, sort_order: maxOrder });
+      await supabase.from('menus').insert({ ...payload, sort_order: maxOrder, service_type: 'rinpa' });
     }
 
     setSaving(false);

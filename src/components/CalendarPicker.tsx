@@ -17,24 +17,20 @@ export function CalendarPicker({ onSelect, onBack }: Props) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
-  const [closedDow, setClosedDow] = useState<number[]>([]);
-  const [closedDateSet, setClosedDateSet] = useState<Set<string>>(new Set());
+  const [availableDateSet, setAvailableDateSet] = useState<Set<string>>(new Set());
 
   const todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
 
   useEffect(() => {
     supabase
-      .from('closed_dates')
-      .select('type, day_of_week, date')
+      .from('available_slots')
+      .select('date')
+      .gte('date', todayStr)
       .then(({ data }) => {
         if (!data) return;
-        setClosedDow(
-          data.filter(r => r.type === 'weekly').map(r => r.day_of_week as number)
-        );
-        setClosedDateSet(
-          new Set(data.filter(r => r.type === 'date').map(r => r.date as string))
-        );
+        setAvailableDateSet(new Set(data.map(r => r.date as string)));
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
@@ -75,16 +71,15 @@ export function CalendarPicker({ onSelect, onBack }: Props) {
           if (!day) return <div key={`e-${i}`} />;
           const dateStr = formatDate(viewYear, viewMonth, day);
           const isPast = dateStr < todayStr;
+          const isAvailable = availableDateSet.has(dateStr);
           const dow = new Date(viewYear, viewMonth, day).getDay();
           const isSun = dow === 0;
-          const isClosed = closedDow.includes(dow) || closedDateSet.has(dateStr);
-          const disabled = isPast || isClosed;
+          const disabled = isPast || !isAvailable;
           return (
             <button
               key={day}
-              className={`calendar-day${isPast ? ' disabled' : isClosed ? ' disabled closed' : ''}${isSun ? ' sunday' : ''}`}
+              className={`calendar-day${disabled ? ' disabled' : ''}${isSun ? ' sunday' : ''}`}
               disabled={disabled}
-              title={isClosed && !isPast ? '定休日' : undefined}
               onClick={() => onSelect(dateStr)}
             >
               {day}

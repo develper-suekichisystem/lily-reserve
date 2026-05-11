@@ -88,8 +88,9 @@ CREATE TABLE closed_dates (
 ALTER TABLE closed_dates ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "closed_dates_all" ON closed_dates FOR ALL USING (true) WITH CHECK (true);
 
--- blocked_slots（対応不可日時）
-CREATE TABLE blocked_slots (
+-- available_slots（予約受付可能日時）
+-- ※ 旧 blocked_slots（対応不可日時）から変更。管理者が「受付OK」の日時を登録する方式に変更。
+CREATE TABLE available_slots (
   id         UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
   date       DATE        NOT NULL,
   time       TIME        NOT NULL,
@@ -97,8 +98,15 @@ CREATE TABLE blocked_slots (
   UNIQUE (date, time)
 );
 
-ALTER TABLE blocked_slots ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "blocked_slots_all" ON blocked_slots FOR ALL USING (true) WITH CHECK (true);
+ALTER TABLE available_slots ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "available_slots_all" ON available_slots FOR ALL USING (true) WITH CHECK (true);
+
+-- ============================================================
+-- Migration: blocked_slots から available_slots へ移行
+-- Supabase で既に blocked_slots が存在する場合は以下を実行:
+-- DROP TABLE IF EXISTS blocked_slots;
+-- DROP TABLE IF EXISTS closed_dates;
+-- ============================================================
 
 -- ============================================================
 -- 初期データ（メニュー）

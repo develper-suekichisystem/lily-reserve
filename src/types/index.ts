@@ -42,14 +42,7 @@ export interface ReservationState {
 
 export type Step = 'menu' | 'calendar' | 'time' | 'form' | 'confirm' | 'complete';
 
-export interface ClosedDate {
-  id: string;
-  type: 'weekly' | 'date';
-  day_of_week: number | null;
-  date: string | null;
-}
-
-export interface BlockedSlot {
+export interface AvailableSlot {
   id: string;
   date: string;
   time: string;

@@ -108,7 +108,7 @@ export function AdminPage() {
           className={`admin-tab${tab === 'schedule' ? ' active' : ''}`}
           onClick={() => setTab('schedule')}
         >
-          休日設定
+          受付設定
         </button>
       </div>
 

@@ -553,58 +553,84 @@ textarea.form-input { resize: vertical; font-family: inherit; }
 .form-hint { font-size: 11px; color: var(--gray-400); margin-top: 2px; }
 
 /* ============================================================
-   休日設定
+   受付設定
    ============================================================ */
-.schedule-admin { padding: 16px; display: flex; flex-direction: column; gap: 24px; }
-.schedule-section {
-  border: 1px solid var(--gray-200); border-radius: 12px; padding: 16px;
-}
-.schedule-heading {
-  font-size: 15px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px;
-}
+.schedule-admin { padding: 16px; display: flex; flex-direction: column; gap: 20px; }
+.schedule-heading { font-size: 15px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px; }
 .schedule-desc { font-size: 12px; color: var(--gray-400); margin-bottom: 12px; }
+.schedule-empty { font-size: 13px; color: var(--gray-400); text-align: center; padding: 24px 0; }
 
-/* 定休曜日ボタン */
-.dow-grid { display: flex; gap: 8px; flex-wrap: wrap; }
-.dow-btn {
-  width: 40px; height: 40px; border-radius: 50%;
+/* 一覧モード */
+.schedule-header-row { display: flex; justify-content: flex-end; }
+.btn-primary {
+  background: var(--tiffany); color: var(--white); border: none;
+  border-radius: 10px; padding: 12px 20px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; width: 100%;
+}
+.btn-primary:hover { background: var(--tiffany-dark); }
+
+.schedule-month-group { display: flex; flex-direction: column; gap: 8px; }
+.schedule-month-heading {
+  font-size: 14px; font-weight: 700; color: var(--tiffany);
+  border-bottom: 1px solid var(--gray-100); padding-bottom: 4px;
+}
+.schedule-day-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 6px 0;
+}
+.schedule-day-label {
+  font-size: 13px; font-weight: 600; color: var(--gray-700);
+  white-space: nowrap; min-width: 110px; padding-top: 4px;
+}
+.schedule-time-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.schedule-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #e6f7f5; color: var(--tiffany); border-radius: 20px;
+  padding: 3px 10px 3px 12px; font-size: 12px; font-weight: 600;
+}
+.chip-remove {
+  background: none; border: none; cursor: pointer;
+  color: var(--tiffany); font-size: 13px; line-height: 1;
+  padding: 0; font-family: inherit;
+}
+.chip-remove:hover { color: var(--error); }
+
+/* 設定モード — インラインカレンダー */
+.inline-calendar { margin-bottom: 16px; }
+.calendar-day.selected {
+  background: var(--tiffany); color: var(--white); border-color: var(--tiffany);
+}
+
+/* 設定モード — 時間トグル */
+.edit-date-label {
+  font-size: 14px; font-weight: 700; color: var(--gray-800);
+  margin-bottom: 10px;
+}
+.time-toggle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
+.time-toggle-btn {
   border: 2px solid var(--gray-200); background: var(--white);
-  font-size: 14px; font-weight: 600; color: var(--gray-600);
-  cursor: pointer; transition: all 0.15s; font-family: inherit;
+  border-radius: 10px; padding: 10px 0; font-size: 13px; font-weight: 600;
+  color: var(--gray-500); cursor: pointer; font-family: inherit; transition: all 0.15s;
 }
-.dow-btn:hover:not(:disabled) { border-color: var(--tiffany); color: var(--tiffany); }
-.dow-btn.closed {
-  border-color: var(--error); background: #fef2f2; color: var(--error);
+.time-toggle-btn.on {
+  border-color: var(--tiffany); background: #e6f7f5; color: var(--tiffany);
 }
-.dow-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.time-toggle-btn:hover:not(.on) { border-color: var(--gray-400); color: var(--gray-700); }
 
-/* 追加フォーム行 */
-.schedule-add-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-.schedule-date-input, .schedule-time-select {
-  border: 1px solid var(--gray-200); border-radius: 8px;
-  padding: 8px 10px; font-size: 13px; color: var(--gray-800);
-  outline: none; font-family: inherit;
+.btn-save {
+  background: var(--tiffany); color: var(--white); border: none;
+  border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit; width: 100%;
 }
-.schedule-date-input:focus, .schedule-time-select:focus {
-  border-color: var(--tiffany);
-}
+.btn-save:hover { background: var(--tiffany-dark); }
+.btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* リスト */
-.schedule-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.schedule-item {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 12px; background: var(--gray-50); border-radius: 8px;
-  font-size: 13px; color: var(--gray-700);
-}
+/* 共通 */
 .btn-remove {
   font-size: 12px; border-radius: 6px; padding: 3px 10px;
   border: 1px solid var(--error); background: none;
   color: var(--error); cursor: pointer; font-family: inherit; white-space: nowrap;
 }
 .btn-remove:hover { background: #fef2f2; }
-
-/* 定休日カレンダー表示 */
-.calendar-day.closed:not(.disabled) { background: #fef2f2; color: var(--error); }
-.calendar-day.disabled.closed { color: var(--gray-300); }
-.calendar-dow.saturday { color: #3b82f6; }
 .btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
+.calendar-dow.saturday { color: #3b82f6; }

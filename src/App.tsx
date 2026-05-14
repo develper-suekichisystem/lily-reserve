@@ -13,6 +13,11 @@ import { LoadingSpinner } from './components/LoadingSpinner';
 import { supabase } from './lib/supabase';
 import type { Step, ReservationState, Menu } from './types';
 
+function timeToMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + (m || 0);
+}
+
 const INITIAL_STATE: ReservationState = {
   selectedMenu: null,
   selectedDate: null,
@@ -77,15 +82,20 @@ function ReservationApp() {
         .single();
       if (ue || !user) throw new Error('ユーザー登録に失敗しました');
 
-      // 二重予約チェック
-      const { data: existing } = await supabase
+      // 二重予約チェック（provider_duration_minutes で重複判定）
+      const newStart = timeToMinutes(time);
+      const newDuration = menu.provider_duration_minutes;
+      const { data: existingReservations } = await supabase
         .from('reservations')
-        .select('id')
-        .eq('date', state.selectedDate)
-        .eq('time', state.selectedTime)
-        .eq('status', 'confirmed')
-        .maybeSingle();
-      if (existing) throw new Error('この時間はすでに予約されています。別の時間をお選びください。');
+        .select('time, menu:menus(provider_duration_minutes)')
+        .eq('date', date)
+        .eq('status', 'confirmed');
+      const hasConflict = (existingReservations ?? []).some((r: { time: string; menu: { provider_duration_minutes: number } | null }) => {
+        const rStart = timeToMinutes((r.time as string).slice(0, 5));
+        const rDuration = r.menu?.provider_duration_minutes ?? 60;
+        return newStart < rStart + rDuration && rStart < newStart + newDuration;
+      });
+      if (hasConflict) throw new Error('この時間はすでに予約されています。別の時間をお選びください。');
 
       // 予約作成
       const { data: reservation, error: re } = await supabase
@@ -120,6 +130,7 @@ function ReservationApp() {
           date,
           time,
           reservationId: reservation.id,
+          customerDurationMinutes: menu.customer_duration_minutes,
         }),
       }).catch(console.error);
 
@@ -154,9 +165,10 @@ function ReservationApp() {
             onBack={() => setStep('menu')}
           />
         )}
-        {step === 'time' && state.selectedDate && (
+        {step === 'time' && state.selectedDate && state.selectedMenu && (
           <TimePicker
             date={state.selectedDate}
+            menu={state.selectedMenu}
             onSelect={handleTimeSelect}
             onBack={() => setStep('calendar')}
           />

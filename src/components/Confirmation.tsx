@@ -13,9 +13,15 @@ interface Props {
 export function Confirmation({
   state, displayName, pictureUrl, isFirstVisit, onConfirm, onBack, submitting,
 }: Props) {
-  const endHour = state.selectedTime
-    ? parseInt(state.selectedTime.slice(0, 2)) + 1
-    : null;
+  function endTimeDisplay(): string | null {
+    if (!state.selectedTime || !state.selectedMenu) return null;
+    const [h, m] = state.selectedTime.split(':').map(Number);
+    const endMins = h * 60 + (m || 0) + state.selectedMenu.customer_duration_minutes;
+    const eh = Math.floor(endMins / 60);
+    const em = endMins % 60;
+    return em === 0 ? `${String(eh).padStart(2, '0')}:00` : `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`;
+  }
+  const endTime = endTimeDisplay();
 
   return (
     <div className="confirmation">
@@ -33,7 +39,7 @@ export function Confirmation({
           <span className="confirm-label">日時</span>
           <span className="confirm-value">
             {state.selectedDate?.replace(/-/g, '/')}&nbsp;
-            {state.selectedTime}〜{endHour && `${String(endHour).padStart(2, '0')}:00`}
+            {state.selectedTime}〜{endTime}
           </span>
         </div>
         <div className="confirm-row">

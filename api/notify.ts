@@ -9,6 +9,7 @@ interface NotifyPayload {
   date: string;   // YYYY-MM-DD
   time: string;   // HH:MM
   reservationId: string;
+  customerDurationMinutes: number;
 }
 
 async function pushMessage(to: string, text: string): Promise<void> {
@@ -31,12 +32,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { userId, userName, menuName, date, time, reservationId } =
+  const { userId, userName, menuName, date, time, reservationId, customerDurationMinutes } =
     req.body as NotifyPayload;
 
   const formattedDate = date.replace(/-/g, '/');
-  const endHour = parseInt(time.slice(0, 2)) + 1;
-  const endTime = `${String(endHour).padStart(2, '0')}:00`;
+  const startMins = parseInt(time.slice(0, 2)) * 60 + parseInt(time.slice(3, 5) || '0');
+  const endMins = startMins + (customerDurationMinutes ?? 60);
+  const endH = Math.floor(endMins / 60);
+  const endM = endMins % 60;
+  const endTime = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
   const shortId = reservationId.slice(0, 8).toUpperCase();
 
   const userMsg = `【ご予約確認】

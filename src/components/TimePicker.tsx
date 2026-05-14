@@ -47,7 +47,7 @@ export function TimePicker({ date, menu, onSelect, onBack }: Props) {
           .eq('status', 'confirmed'),
       ]);
       setAvailableTimes(slotData?.map(r => (r.time as string).slice(0, 5)) ?? []);
-      setReservations((reservData ?? []) as ReservationWithMenu[]);
+      setReservations((reservData ?? []) as unknown as ReservationWithMenu[]);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);

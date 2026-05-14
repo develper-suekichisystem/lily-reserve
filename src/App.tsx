@@ -90,7 +90,7 @@ function ReservationApp() {
         .select('time, menu:menus(provider_duration_minutes)')
         .eq('date', date)
         .eq('status', 'confirmed');
-      const hasConflict = (existingReservations ?? []).some((r: { time: string; menu: { provider_duration_minutes: number } | null }) => {
+      const hasConflict = (existingReservations ?? []).some((r: any) => {
         const rStart = timeToMinutes((r.time as string).slice(0, 5));
         const rDuration = r.menu?.provider_duration_minutes ?? 60;
         return newStart < rStart + rDuration && rStart < newStart + newDuration;

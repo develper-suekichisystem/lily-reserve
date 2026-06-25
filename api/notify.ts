@@ -6,8 +6,8 @@ interface NotifyPayload {
   userId: string;
   userName: string;
   menuName: string;
-  date: string;   // YYYY-MM-DD
-  time: string;   // HH:MM
+  date: string; // YYYY-MM-DD
+  time: string; // HH:MM
   reservationId: string;
   customerDurationMinutes: number;
 }
@@ -32,11 +32,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { userId, userName, menuName, date, time, reservationId, customerDurationMinutes } =
-    req.body as NotifyPayload;
+  const {
+    userId,
+    userName,
+    menuName,
+    date,
+    time,
+    reservationId,
+    customerDurationMinutes,
+  } = req.body as NotifyPayload;
 
   const formattedDate = date.replace(/-/g, '/');
-  const startMins = parseInt(time.slice(0, 2)) * 60 + parseInt(time.slice(3, 5) || '0');
+  const startMins =
+    parseInt(time.slice(0, 2)) * 60 + parseInt(time.slice(3, 5) || '0');
   const endMins = startMins + (customerDurationMinutes ?? 60);
   const endH = Math.floor(endMins / 60);
   const endM = endMins % 60;

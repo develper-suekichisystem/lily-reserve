@@ -403,10 +403,35 @@ body {
 }
 .admin-time { font-size: 20px; font-weight: 700; color: var(--tiffany); min-width: 58px; padding-top: 2px; }
 .admin-info { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.admin-name { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+.admin-name {
+  font-size: 15px; font-weight: 600; color: var(--gray-800);
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
 .admin-menu { font-size: 13px; color: var(--tiffany-dark); }
 .admin-contact { font-size: 12px; color: var(--gray-600); display: flex; flex-direction: column; gap: 2px; }
+.admin-location { font-size: 12px; color: var(--gray-600); }
 .admin-referrer { font-size: 12px; color: var(--gray-400); }
+
+/* サービス種別（リンパ / カウンセリング）— DB共用のため一覧で区別する */
+.admin-service-badge {
+  font-size: 11px; font-weight: 600; line-height: 1;
+  padding: 3px 7px; border-radius: 999px; white-space: nowrap;
+}
+.admin-service-badge.service-rinpa { background: #e6f7f5; color: var(--tiffany-dark); }
+.admin-service-badge.service-counselor { background: #f1ecfb; color: #6b4fbb; }
+.admin-card.service-counselor { border-left: 3px solid #6b4fbb; }
+
+.admin-filter { display: flex; gap: 8px; padding: 12px 16px 0; }
+.admin-filter-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border: 1px solid var(--gray-200); border-radius: 999px;
+  background: var(--white); color: var(--gray-600);
+  font-size: 12px; font-family: inherit; cursor: pointer;
+}
+.admin-filter-btn.active {
+  border-color: var(--tiffany); background: var(--tiffany); color: var(--white);
+}
+.admin-filter-count { font-weight: 700; }
 .btn-cancel {
   background: none; border: 1px solid var(--error); color: var(--error);
   border-radius: 6px; padding: 4px 10px; font-size: 12px;

@@ -7,27 +7,64 @@ import type { Reservation } from '../../types';
 
 type AdminTab = 'reservations' | 'menus' | 'schedule';
 
+const MONTH_NAMES = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const DAY_NAMES = ['日','月','火','水','木','金','土'];
+
+function pad(n: number) {
+  return String(n).padStart(2, '0');
+}
+
 function ReservationAdmin() {
-  const today = new Date().toISOString().split('T')[0];
-  const [selectedDate, setSelectedDate] = useState(today);
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-11
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchReservations();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate]);
+  }, [viewYear, viewMonth]);
 
   async function fetchReservations() {
     setLoading(true);
+    const from = `${viewYear}-${pad(viewMonth + 1)}-01`;
+    const lastDay = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const to = `${viewYear}-${pad(viewMonth + 1)}-${pad(lastDay)}`;
     const { data } = await supabase
       .from('reservations')
       .select(`*, user:users(*), menu:menus(*)`)
-      .eq('date', selectedDate)
+      .gte('date', from)
+      .lte('date', to)
       .eq('status', 'confirmed')
+      .order('date')
       .order('time');
     if (data) setReservations(data as Reservation[]);
     setLoading(false);
+  }
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
+    else setViewMonth(m => m - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
+    else setViewMonth(m => m + 1);
+  };
+
+  // 日付ごとにグルーピング（取得時点で date, time 順にソート済み）
+  const groups: { date: string; items: Reservation[] }[] = [];
+  for (const r of reservations) {
+    const date = r.date as string;
+    const last = groups[groups.length - 1];
+    if (last && last.date === date) last.items.push(r);
+    else groups.push({ date, items: [r] });
+  }
+
+  function formatGroupDate(date: string) {
+    const [, m, d] = date.split('-').map(Number);
+    const dow = DAY_NAMES[new Date(date + 'T00:00:00').getDay()];
+    return `${m}月${d}日（${dow}）`;
   }
 
   async function cancelReservation(id: string) {
@@ -38,22 +75,25 @@ function ReservationAdmin() {
 
   return (
     <>
-      <div className="admin-date-picker">
-        <label>日付：</label>
-        <input
-          type="date"
-          value={selectedDate}
-          onChange={e => setSelectedDate(e.target.value)}
-        />
+      <div className="admin-month-nav">
+        <button className="nav-btn" onClick={prevMonth}>◀</button>
+        <span className="admin-month">{viewYear}年 {MONTH_NAMES[viewMonth]}</span>
+        <button className="nav-btn" onClick={nextMonth}>▶</button>
       </div>
 
       {loading ? (
         <div className="loading">読み込み中...</div>
       ) : reservations.length === 0 ? (
-        <p className="no-data">この日の予約はありません</p>
+        <p className="no-data">この月の予約はありません</p>
       ) : (
+        groups.map(g => (
+        <div key={g.date} className="admin-day-group">
+          <div className="admin-day-header">
+            {formatGroupDate(g.date)}
+            <span className="admin-day-count">{g.items.length}件</span>
+          </div>
         <div className="admin-list">
-          {reservations.map(r => (
+          {g.items.map(r => (
             <div key={r.id} className="admin-card">
               <div className="admin-time">{(r.time as string).slice(0, 5)}</div>
               <div className="admin-info">
@@ -73,6 +113,8 @@ function ReservationAdmin() {
             </div>
           ))}
         </div>
+        </div>
+        ))
       )}
     </>
   );

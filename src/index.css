@@ -380,6 +380,19 @@ body {
   border: 1px solid var(--gray-200); border-radius: 8px;
   padding: 8px 12px; font-size: 14px; color: var(--gray-800); outline: none;
 }
+.admin-month-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--gray-100);
+}
+.admin-month { font-size: 16px; font-weight: 700; color: var(--gray-800); }
+.admin-day-group { border-bottom: 1px solid var(--gray-100); }
+.admin-day-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: var(--gray-50);
+  font-size: 14px; font-weight: 700; color: var(--gray-800);
+  position: sticky; top: 0; z-index: 1;
+}
+.admin-day-count { font-size: 12px; font-weight: 600; color: var(--tiffany-dark); }
 .no-data { text-align: center; color: var(--gray-400); padding: 40px; }
 .admin-list { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; }
 .admin-card {

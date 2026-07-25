@@ -71,6 +71,12 @@ function ReservationApp() {
     setSubmitting(true);
 
     await withLoading(async () => { try {
+      // 当日以前の予約は受け付けない
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const minDate = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+      if (date < minDate) throw new Error('当日のご予約はお受けできません。翌日以降の日付をお選びください。');
+
       // ユーザーをupsert（LINEの名前を保存）
       const { data: user, error: ue } = await supabase
         .from('users')

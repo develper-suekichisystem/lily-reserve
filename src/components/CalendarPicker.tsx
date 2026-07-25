@@ -19,13 +19,15 @@ export function CalendarPicker({ onSelect, onBack }: Props) {
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [availableDateSet, setAvailableDateSet] = useState<Set<string>>(new Set());
 
-  const todayStr = formatDate(today.getFullYear(), today.getMonth(), today.getDate());
+  // 当日の予約は受け付けないため、翌日以降のみ選択可能
+  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const minDateStr = formatDate(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate());
 
   useEffect(() => {
     supabase
       .from('available_slots')
       .select('date')
-      .gte('date', todayStr)
+      .gte('date', minDateStr)
       .then(({ data }) => {
         if (!data) return;
         setAvailableDateSet(new Set(data.map(r => r.date as string)));
@@ -70,7 +72,7 @@ export function CalendarPicker({ onSelect, onBack }: Props) {
         {cells.map((day, i) => {
           if (!day) return <div key={`e-${i}`} />;
           const dateStr = formatDate(viewYear, viewMonth, day);
-          const isPast = dateStr < todayStr;
+          const isPast = dateStr < minDateStr;
           const isAvailable = availableDateSet.has(dateStr);
           const dow = new Date(viewYear, viewMonth, day).getDay();
           const isSun = dow === 0;
